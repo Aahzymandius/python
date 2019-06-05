@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: load-db
+  namespace: titanic
+spec:
+  template:
+    spec:
+      containers:
+      - name: loader
+        image: gcr.io/shared-vpc-231717/db-load:v4
+        env:
+        - name: USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: user            
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: password
+        - name: DATABASE
+          valueFrom:
+            configMapKeyRef: 
+              name: api-variables
+              key: database
+        - name: MASTER
+          valueFrom:
+            configMapKeyRef:
+              name: api-variables
+              key: writes
+      restartPolicy: OnFailure
