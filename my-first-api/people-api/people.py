@@ -13,15 +13,41 @@ writeserver = os.environ['MASTER']
 
 app = Flask(__name__)
 
+##Establish Mysql connections, one for read/write and one for just reads
 readconn = pymysql.connect(readserver,uname,passwd,db)
 masterconn = pymysql.connect(writeserver,uname,passwd,db)
+
+##Create  the format for the json API response
+def json_format(x):
+  
+  uuid = x[0]
+  survived = x[1]
+  pclass = x[2]
+  name = x[3]
+  sex = x[4]
+  age = x[5]
+  sibl = x[6]
+  parents = x[7]
+  fare = x[8]
+  
+  dict = {"UUID":uuid, "survived":survived, "passengerClass": pclass, "name":name, "sex":sex, "age":age, "siblingsOrSpousesAboard":sibl, "parentsOrChildrenAboard":parents, "fare":fare}
+  
+  return dict
+
 
 @app.route('/people', methods=['GET'])
 def get_all():
   
+  sql = "SELECT * FROM passengers"
+  
   conn = readconn.cursor()
-  query = conn.execute("SELECT * FROM passengers")
-  rows = conn.fetchall()
+  query = conn.execute(sql)
+  results = conn.fetchall()
+  
+  rows = []
+  for row in results:
+    y = json_format(row)
+    rows.append(y)
   
   resp = jsonify(rows)
   resp.status_code = 200
@@ -46,11 +72,13 @@ def post():
   conn.execute(sql,data)
   masterconn.commit()
   
-  conn.execute("SELECT * FROM passengers WHERE Name='%s'" % name)
-  lastEntry = conn.fetchall()
+  sql2 = "SELECT * FROM passengers WHERE Name='%s'" % name
   
-  resp = jsonify(lastEntry)
-  resp.status_code = 200
+  conn.execute(sql2)
+  lastEntry = conn.fetchone()
+  format = json_format(lastEntry)
+  
+  resp = jsonify(format)
   return resp
 
 
