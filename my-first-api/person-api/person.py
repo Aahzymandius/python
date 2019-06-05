@@ -17,14 +17,37 @@ api = Api(app)
 readconn = pymysql.connect(readserver,uname,passwd,db)
 masterconn = pymysql.connect(writeserver,uname,passwd,db)
 
+##Create  the format for the json API response
+def json_format(x):
+
+  uuid = x[0]
+  survived = x[1]
+  pclass = x[2]
+  name = x[3]
+  sex = x[4]
+  age = x[5]
+  sibl = x[6]
+  parents = x[7]
+  fare = x[8]
+
+  dict = {"UUID":uuid, "survived":survived, "passengerClass": pclass, "name":name, "sex":sex, "age":age, "siblingsOrSpousesAboard":sibl, "parentsOrChildrenAboard":parents, "fare":fare}
+
+  return dict
+
+
 class People(Resource):
   def get(self,uuid):
 
-    try:
-      conn = readconn.cursor()
-      conn.execute("SELECT * FROM passengers WHERE UUID='%s'" % uuid)
+    sql = "SELECT * FROM passengers WHERE UUID='%s'" % uuid
 
-      resp = jsonify(conn.fetchall())
+    try:
+
+      conn = readconn.cursor()
+      conn.execute(sql)
+      query = conn.fetchone()
+      result = json_format(query)
+
+      resp = jsonify(result)
       resp.response_code = 200
       return resp
 
@@ -36,10 +59,17 @@ class People(Resource):
 
   def delete(self,uuid):
 
+    sql = "DELETE FROM passengers WHERE UUID='%s'" % uuid
+
     try:
+
       conn = masterconn.cursor()
-      conn.execute("DELETE FROM passengers WHERE UUID='%s'" % uuid)
+      conn.execute(sql)
       masterconn.commit()
+
+      resp = jsonify('OK')
+      resp.status_code = 200
+      return resp
 
     except:
       resp = jsonify("Not found")
@@ -67,6 +97,7 @@ class People(Resource):
 
       resp = jsonify('updated')
       resp.status_code = 200
+      return resp
 
     except:
       resp = jsonify('Not found')
