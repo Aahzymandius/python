@@ -1,0 +1,2 @@
+1. Configure the Mysql statefulset to use a root password instead of leaving it blank
+2. Set up helm chart for the full deployment rather than applying multiple YAMLs
