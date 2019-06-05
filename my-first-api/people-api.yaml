@@ -1,7 +1,8 @@
+##people.py
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: api
+  name: people-api
   namespace: titanic
 spec:
   replicas: 2
@@ -30,17 +31,18 @@ spec:
             podAffinityTerm:
               labelSelector:
                 matchExpressions:
-                - key: path
+                - key: project
                   operator: In
                   values:
-                  - people
+                  - frontend
               topologyKey: kubernetes.io/hostname
       securityContext: 
       ##Ensure the pod does not have root access to the host
         runAsNonRoot: FALSE
       containers:
-      - name: my-api
-        image: gcr.io/shared-vpc-231717/people-api-front:latest
+      - name: people-api
+        ##Update with the proper image name
+        image: [your_repo/people.py]
         ports:
         - name: flask
           containerPort: 5000
@@ -98,7 +100,7 @@ spec:
   scaleTargetRef:
     kind: Deployment
     apiVersion: apps/v1
-    name: api
+    name: people-api
     
 ---
 
@@ -119,6 +121,129 @@ spec:
   
  ---
  
+ ##person.py
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: person-api
+  namespace: titanic
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mysql-api
+      project: frontend
+      path: person
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: mysql-api
+        project: frontend
+        path: person
+    spec:
+      affinity:
+        ##set anti affinity to avoid having all the pods from this workload on the same node in case of node failure
+        podAntiAffinity: 
+          ## Only using prefered to avoid scheduling complications, the rule is not required
+          preferredDuringSchedulingIgnoredDuringExecution: 
+          - weight: 50
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: project
+                  operator: In
+                  values:
+                  - frontend
+              topologyKey: kubernetes.io/hostname
+      securityContext: 
+      ##Ensure the pod does not have root access to the host
+        runAsNonRoot: FALSE
+      containers:
+      - name: person-api
+        ##Update with the proper image name
+        image: [your_repo/person.py]
+        ports:
+        - name: flask
+          containerPort: 5000
+        env:  ##Set db variables for the api from secret and config map
+        - name: USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: user            
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: password
+        - name: DATABASE
+          valueFrom:
+            configMapKeyRef: 
+              name: api-variables
+              key: database
+        - name: MASTER
+          valueFrom:
+            configMapKeyRef:
+              name: api-variables
+              key: writes
+        - name: SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: api-variables
+              key: reads
+        resources:
+          requests:
+            cpu: 25m
+            memory: 50Mi
+          limits:
+            cpu: 50m
+            memory: 100Mi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 3
+---
+
+
+kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/v1
+metadata:
+  name: api-hpa
+  namespace: titanic
+spec:
+  maxReplicas: 10
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 80
+  scaleTargetRef:
+    kind: Deployment
+    apiVersion: apps/v1
+    name: person-api
+    
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: person-api
+  namespace: titanic
+spec:
+  selector:
+    app: mysql-api
+    project: frontend
+    path: person
+  ports:
+  - port: 80
+    targetPort: 5000
+  type: NodePort
+
+---
+
  ##I have left the ingress controller annotation empty so that the default one is used. If no default ingress is available, I would have the nginx ingress controller installed.
 kind: Ingress
 apiVersion: extensions/v1beta1
@@ -134,7 +259,7 @@ spec:
         backend:
           serviceName: people-api
           servicePort: 80
-      #- path: /person/*
-        #backend:
-          #serviceName: person-api
-          #servicePort: 80
+      - path: /people/*
+        backend:
+          serviceName: person-api
+          servicePort: 80
