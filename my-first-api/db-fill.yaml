@@ -4,6 +4,8 @@ metadata:
   name: load-db
   namespace: titanic
 spec:
+  ttlSecondsAfterFinished: 300
+  completions: 1
   template:
     spec:
       containers:
