@@ -12,14 +12,14 @@ readserver = os.environ['SERVER']
 writeserver = os.environ['MASTER']
 
 app = Flask(__name__)
+api = Api(app)
 
-##Establish Mysql connections, one for read/write and one for just reads
 readconn = pymysql.connect(readserver,uname,passwd,db)
 masterconn = pymysql.connect(writeserver,uname,passwd,db)
 
 ##Create  the format for the json API response
 def json_format(x):
-  
+
   uuid = x[0]
   survived = x[1]
   pclass = x[2]
@@ -29,33 +29,32 @@ def json_format(x):
   sibl = x[6]
   parents = x[7]
   fare = x[8]
-  
+
   dict = {"UUID":uuid, "survived":survived, "passengerClass": pclass, "name":name, "sex":sex, "age":age, "siblingsOrSpousesAboard":sibl, "parentsOrChildrenAboard":parents, "fare":fare}
-  
+
   return dict
 
 
-@app.route('/people', methods=['GET'])
-def get_all():
+class People(Resource):
+  def get(self):
   
-  sql = "SELECT * FROM passengers"
+    sql = "SELECT * FROM passengers"
   
-  conn = readconn.cursor()
-  query = conn.execute(sql)
-  results = conn.fetchall()
+    conn = readconn.cursor()
+    query = conn.execute(sql)
+    results = conn.fetchall()
   
-  rows = []
-  for row in results:
-    y = json_format(row)
-    rows.append(y)
+    rows = []
+    for row in results:
+      y = json_format(row)
+      rows.append(y)
   
-  resp = jsonify(rows)
-  resp.status_code = 200
-  return resp
-  
-@app.route('/people', methods=['POST'])
-def post():
+    resp = jsonify(rows)
+    resp.status_code = 200
+    return resp
 
+  def post(self):
+    
   survived = request.json["survived"]
   pclass = request.json["passengerClass"]
   name = request.json["name"]
@@ -80,13 +79,15 @@ def post():
   
   resp = jsonify(format)
   return resp
+      
+##Something to respond to health checks that won't bombard the db
+class Health(Resource):
+ def get(self):
+   healthy = "true"
+   return(healthy=="true")
 
+api.add_resource(People, '/people')
+api.add_resource(Health, '/health')
 
-##Create a path to respond to health checks
-@app.route('/health')
-def get():
-  healthy = "true"
-  return(healthy=="true")
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+if __name__ == '__main__':
+     app.run(host='0.0.0.0')
