@@ -1,5 +1,6 @@
 import pymysql
 import os
+import time
 
 passwd = ''
 db = os.environ['DATABASE']
