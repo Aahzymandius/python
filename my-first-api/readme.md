@@ -1,3 +1,7 @@
+# About the API
+
+As the title mentions, this is my first API and has served as a great learning experience for me and should continue to serve as such since there are still a few minor issues to overcome as mentioned in the TODO. 
+
 # Steps to deploy API
 
 ## 1. Create docker images 
