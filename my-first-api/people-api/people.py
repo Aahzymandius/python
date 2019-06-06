@@ -54,31 +54,31 @@ class People(Resource):
     return resp
 
   def post(self):
-    
-  survived = request.json["survived"]
-  pclass = request.json["passengerClass"]
-  name = request.json["name"]
-  sex = request.json["sex"]
-  age = request.json["age"]
-  siblings = request.json["siblingsOrSpousesAboard"]
-  parents = request.json["parentsOrChildrenAboard"]
-  fare = request.json["fare"]
 
-  sql = "INSERT INTO passengers (Survived, Pclass, Name, Sex, Age, `Siblings/Spouses Aboard`, `Parents/Children Aboard`, Fare) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
-  data = (survived, pclass, name, sex, age, siblings, parents, fare)
+    survived = request.json["survived"]
+    pclass = request.json["passengerClass"]
+    name = request.json["name"]
+    sex = request.json["sex"]
+    age = request.json["age"]
+    siblings = request.json["siblingsOrSpousesAboard"]
+    parents = request.json["parentsOrChildrenAboard"]
+    fare = request.json["fare"]
 
-  conn = masterconn.cursor()
-  conn.execute(sql,data)
-  masterconn.commit()
+    sql = "INSERT INTO passengers (Survived, Pclass, Name, Sex, Age, `Siblings/Spouses Aboard`, `Parents/Children Aboard`, Fare) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
+    data = (survived, pclass, name, sex, age, siblings, parents, fare)
+
+    conn = masterconn.cursor()
+    conn.execute(sql,data)
+    masterconn.commit()
+
+    sql2 = "SELECT * FROM passengers WHERE Name='%s'" % name
   
-  sql2 = "SELECT * FROM passengers WHERE Name='%s'" % name
+    conn.execute(sql2)
+    lastEntry = conn.fetchone()
+    format = json_format(lastEntry)
   
-  conn.execute(sql2)
-  lastEntry = conn.fetchone()
-  format = json_format(lastEntry)
-  
-  resp = jsonify(format)
-  return resp
+    resp = jsonify(format)
+    return resp
       
 ##Something to respond to health checks that won't bombard the db
 class Health(Resource):
