@@ -118,7 +118,7 @@ spec:
     targetPort: 5000
   type: NodePort
   
- ---
+---
  
  ##person.py
 kind: Deployment
