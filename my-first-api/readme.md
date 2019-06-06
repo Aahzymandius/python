@@ -18,6 +18,8 @@ Run the db-fill job to populate the database; **make sure to update the yaml wit
 
     kubectl apply -f db-fill.yaml
 
+Note that the db-fill job will clean itself up 5 minutes after completion. The 5 minute window allows you time to inspect the pod or review container logs.
+
 ## 5. Deploy the API 
 
 Deploy the APIfrontends; **make sure to update the yaml with the people and person images**
