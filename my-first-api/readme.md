@@ -38,3 +38,9 @@ Once the Ingress has an IP assigned, test the API using the following defined me
 - GET /people/uuid
 - DELETE /people/uuid
 - PUT /people/uuid (this requires including json data)
+
+## Clean up
+
+To clean up, you can delete the namespace and all the resources you just created will be deleted.
+
+    kubectl delete ns titanic
