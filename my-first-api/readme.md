@@ -11,4 +11,5 @@
 4. Run the db-fill job to populate the database (make sure to update the yaml with your db-fill image)
     kubectl apply -f db-fill.yaml
 
-5. Deploy the API 
+5. Deploy the API frontends (make sure to (make sure to update the yaml with the people and person images)
+    kubectl apply -f api.yaml
