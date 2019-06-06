@@ -2,6 +2,8 @@
 
 As the title mentions, this is my first API and has served as a great learning experience for me and should continue to serve as such since there are still a few minor issues to overcome as mentioned in the TODO. 
 
+The API interfaces with a Mysql backend which (currently) contains a passenger list from the titanic. The API currently supports 5 methods (hopefully) following the Swagger 2.0 model.
+
 # Steps to deploy API
 
 ## 1. Create docker images 
