@@ -82,5 +82,11 @@ def post():
   return resp
 
 
+##Create a path to respond to health checks
+@app.route('/health')
+def get():
+  healthy = "true"
+    return(healthy=="true")
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
