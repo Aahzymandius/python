@@ -5,16 +5,23 @@ passwd = ''
 db = os.environ['DATABASE']
 writeserver = os.environ['MASTER']
 
-#Prepare the db connection
-master = pymysql.connect(writeserver,'root',passwd,db,local_infile=1)
-conn = master.cursor()
-
 ##Wait for the db to initialize
 x=0
 while x==0:
-  ready = conn.execute("SELECT 1")
+  try:
+    master = pymysql.connect(writeserver,'root',passwd,db,local_infile=1)
+    conn = master.cursor()
+    ready = conn.execute("SELECT 1")
+  except:
+    ready = 0
+    return("waiting on db")
+  
   if ready == 1:
     x=1
+
+#Prepare the db connection
+master = pymysql.connect(writeserver,'root',passwd,db,local_infile=1)
+conn = master.cursor()
 
 table = "CREATE TABLE passengers (UUID VARCHAR(40) PRIMARY KEY NOT NULL, Survived BOOLEAN NOT NULL, \
            Pclass INT NOT NULL, Name VARCHAR(255) NOT NULL, Sex ENUM('male','female','other') NOT NULL, \
