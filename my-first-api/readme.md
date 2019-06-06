@@ -14,13 +14,13 @@ For each of the python apps (people-api, person-api, db-fill), you must build th
     
 ## 4. Populate the Database
 
-Run the db-fill job to populate the database (make sure to update the yaml with your db-fill image).
+Run the db-fill job to populate the database; **make sure to update the yaml with your db-fill image**.
 
     kubectl apply -f db-fill.yaml
 
 ## 5. Deploy the API 
 
-Deploy the APIfrontends (make sure to update the yaml with the people and person images)
+Deploy the APIfrontends; **make sure to update the yaml with the people and person images**
 
     kubectl apply -f api.yaml
 
@@ -29,4 +29,10 @@ You can check the status of your resources with the following:
 
     kubectl get po,svc,ing -n titanic
 
-Once the Ingress has an IP assigned
+Once the Ingress has an IP assigned, test the API using the following defined methods:
+
+- GET /people
+- POST /people (this requires including json data)
+- GET /people/uuid
+- DELETE /people/uuid
+- PUT /people/uuid (this requires including json data)
