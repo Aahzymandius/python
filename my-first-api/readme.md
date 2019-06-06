@@ -5,8 +5,12 @@
 For each of the python apps (people-api, person-api, db-fill), you must build the image. Push these images to the repo of your choice. I used Google Cloud Build as it compiles the image remotely and automatically pushed to my GCR.
 
 ## 2. Setup the namespace and configMaps for our deployments
+
+The env.yaml contains required configMaps which our deployments will rely on at creation.
+A secret is also required to contain the DB username and password. Replace the [username] and [set_password] fields to which ever you would like to use, both the apps and the DB will use these credentials.
   
     kubectl apply -f env.yaml
+    kubectl create secret db-secrets --from-literal=user=[username] --from-literal=password=[set_password] -n titanic
     
 ## 3. Create the MySQL database
   
