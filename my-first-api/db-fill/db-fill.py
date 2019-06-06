@@ -14,7 +14,8 @@ while x==0:
     ready = conn.execute("SELECT 1")
   except:
     ready = 0
-    return("waiting on db")
+    error = "waiting on db"
+    print(error)
   
   if ready == 1:
     x=1
