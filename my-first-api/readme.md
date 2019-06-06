@@ -18,3 +18,4 @@ Steps to deploy API
 
     kubectl apply -f api.yaml
 
+You should now have 
