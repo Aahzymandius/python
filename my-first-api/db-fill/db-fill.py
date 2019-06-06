@@ -16,6 +16,7 @@ while x==0:
     ready = 0
     error = "waiting on db"
     print(error)
+    time.sleep(5)
   
   if ready == 1:
     x=1
