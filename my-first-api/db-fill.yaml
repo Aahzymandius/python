@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
       - name: loader
-        image: gcr.io/shared-vpc-231717/db-load:v4
+        image: [db-fill image] ##Make sure to replace this with your image created from the db-fill folder
         env:
         - name: USERNAME
           valueFrom:
