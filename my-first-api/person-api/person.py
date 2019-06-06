@@ -107,7 +107,8 @@ class People(Resource):
 ##Something to respond to health checks that won't bombard the db
 class Health(Resource):
  def get(self):
-   return(TRUE)
+   healthy = "true"
+    return(healthy=="true")
 
 api.add_resource(People, '/people/<string:uuid>')
 api.add_resource(Health, '/health')
