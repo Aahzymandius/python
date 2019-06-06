@@ -1,4 +1,4 @@
-Steps to deploy API
+#Steps to deploy API
 
 1. Create docker images for each of the python apps (people-api, person-api, db-fill). Push these images to the repo of your choice
 
@@ -9,4 +9,6 @@ Steps to deploy API
     kubectl apply -f mysql.yaml
     
 4. Run the db-fill job to populate the database (make sure to update the yaml with your db-fill image)
-    kubectl apply -f 
+    kubectl apply -f db-fill.yaml
+
+5. Deploy the API 
