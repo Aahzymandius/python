@@ -18,4 +18,9 @@ Steps to deploy API
 
     kubectl apply -f api.yaml
 
-You should now have 
+You should now have 3 deployments (2 different API frontends and the Mysql StatefulSet) as well as a few services.
+You can check the status of your resources with the following:
+
+    kubectl get po,svc,ing -n titanic
+
+Once the Ingress has an IP assigned
