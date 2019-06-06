@@ -1,9 +1,14 @@
+Example of REST API CRUD using Flask and Python
 https://www.roytuts.com/python-rest-api-crud-example-using-flask-and-mysql/
 
+Tutorial on using pymysql library
 https://www.tutorialspoint.com/python3/python_database_access.htm
 
+Blog on Multistage builds w/ Docker
 https://blog.realkinetic.com/building-minimal-docker-containers-for-python-applications-37d0272c52f3
 
+Useful post on creating a trigger for Mysql
 https://dba.stackexchange.com/questions/57293/mysql-alter-table-to-automatically-put-in-a-uuid
 
+Insert a csv file into a Mysql table
 https://stackoverflow.com/questions/3635166/how-to-import-csv-file-to-mysql-table
