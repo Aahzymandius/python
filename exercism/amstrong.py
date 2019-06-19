@@ -5,9 +5,5 @@ def armstrong(number):
     dd = int(d)**int(x)
     total+=dd
   if int(total) == int(number):
-    print("You found an armstrong number!")
-  else:
-    print("This is not an armstrong number")
-
-number=input("Enter a number you think may be an armostrong number:")
-armstrong(number)
+    return("You found an armstrong number!")
+  return("This is not an armstrong number")
