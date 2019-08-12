@@ -48,7 +48,8 @@ class People(Resource):
     for row in results:
       y = json_format(row)
       rows.append(y)
-  
+    
+    conn.close()
     resp = jsonify(rows)
     resp.status_code = 200
     return resp
@@ -77,6 +78,7 @@ class People(Resource):
     lastEntry = conn.fetchone()
     format = json_format(lastEntry)
   
+    conn.close()
     resp = jsonify(format)
     return resp
       
