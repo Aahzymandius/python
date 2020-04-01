@@ -1,0 +1,227 @@
+#!/usr/bin/env python
+
+import json
+import os
+import time
+
+import googleapiclient.discovery
+
+PROJECT = os.environ['project']
+
+## Reference: https://developers.google.com/resources/api-libraries/documentation/compute/v1/python/latest/?_ga=2.233515421.2023657955.1585665421-101434639.1581104046
+
+class GoogleProjectCleanUp():
+
+    def __init__(self):
+        self.compute_API = googleapiclient.discovery.build('compute', 'v1')
+        self.instances = []
+        self.disks = []
+        self.instanceGroups = []
+        self.forwardingRules = []
+        self.targetProxies = []
+        self.urlMaps=[]
+        self.backendServices = []
+        self.addresses = []
+        self.healthchecks = []
+
+        self.delete_instances()
+        print('Deleted instances ', self.instances)
+        self.delete_disks()
+        print('Deleted disks ', self.disks)
+        self.delete_forwarding_rules()
+        print('Deleted forewarding rules ',self.forwardingRules)
+        time.sleep(30)
+        self.delete_target_proxies()
+        print('Delete proxies ',self.targetProxies)
+        time.sleep(60)
+        self.delete_urlMaps()
+        print('Delete urlMaps ',self.urlMaps)
+        time.sleep(20)
+        self.delete_backend_services()
+        print('Deleted Backends ', self.backendServices)
+        time.sleep(30)
+        self.delete_instance_groups()
+        print('Deleted groups ', self.instanceGroups)
+        self.delete_health_checks()
+        print('Deleted health checks', self.healthchecks)
+        self.delete_addresses()
+        print('Deleted addresses', self.addresses)
+
+    def delete_instances(self):
+        query = self.compute_API.instances().aggregatedList(project=PROJECT).execute()
+        aggregated_list = query['items']
+        for zone,results in aggregated_list.items():
+            if 'instances' in results:
+                for data in results['instances']:
+                    instanceName = data['name']
+                    zoneName = zone[6:]
+                    print('Deleting ' + instanceName + ' in ' + zoneName)
+                    delete = self.compute_API.instances().delete(project=PROJECT,zone=zoneName,instance=instanceName).execute()
+                    self.instances.append(instanceName)
+
+    def delete_disks(self):
+        query = self.compute_API.disks().aggregatedList(project=PROJECT).execute()
+        aggregated_list = query['items']
+        for zone,results in aggregated_list.items():
+            if 'disks' in results:
+                for data in results['disks']:
+                    diskName = data['name']
+                    zoneName = zone[6:]
+                    print('Deleting ' + diskName + ' in ' + zoneName)
+                    try:
+                        delete = self.compute_API.disks().delete(project=PROJECT,zone=zoneName,disk=diskName).execute()
+                    except:
+                        print('Could not delete ' + diskName + '. It may have already been removed')
+                    self.disks.append(diskName)
+
+    def delete_forwarding_rules(self):
+        globalQuery = self.compute_API.globalForwardingRules().list(project=PROJECT).execute()
+        try:
+            aggregated_list = globalQuery['items']
+            for data in aggregated_list:
+                gfwRule = data['name']
+                print('Deleting ' + gfwRule)
+                delete = self.compute_API.globalForwardingRules().delete(project=PROJECT,forwardingRule=gfwRule).execute()
+                self.forwardingRules.append(gfwRule)
+        except:
+            print('No Forwarding rules present')
+
+    def delete_target_proxies(self):
+        http = self.compute_API.targetHttpProxies().list(project=PROJECT).execute()
+        try:
+            aggregated_list = http['items']
+            for data in aggregated_list:
+                httpProxy = data['name']
+                print('Deleting ' + httpProxy)
+                delete = self.compute_API.targetHttpProxies().delete(project=PROJECT,targetHttpProxy=httpProxy).execute()
+                self.targetProxies.append(httpProxy)
+        except:
+            print('No HTTP Proxies present')
+        https = self.compute_API.targetHttpsProxies().list(project=PROJECT).execute()
+        try:
+            aggregated_list = https['items']
+            for data in aggregated_list:
+                httpsProxy = data['name']
+                print('Deleting ' + httpsProxy)
+                delete = self.compute_API.targetHttpsProxies().delete(project=PROJECT,targetHttpsProxy=httpsProxy).execute()
+                self.targetProxies.append(httpsProxy)
+        except:
+            print('No HTTPS Proxies present')
+        ssl = self.compute_API.targetSslProxies().list(project=PROJECT).execute()
+        try:
+            aggregated_list = ssl['items']
+            for data in aggregated_list:
+                sslProxy = data['name']
+                print('Deleting ' + sslProxy)
+                delete = self.compute_API.targetSslProxies().delete(project=PROJECT,targetSslProxy=sslProxy).execute()
+                self.targetProxies.append(sslProxy)
+        except:
+            print('No SSL Proxies present')
+        tcp = self.compute_API.targetTcpProxies().list(project=PROJECT).execute()
+        try:
+            aggregated_list = tcp['items']
+            for data in aggregated_list:
+                tcpProxy = data['name']
+                print('Deleting ' + tcpProxy)
+                delete = self.compute_API.targetTcpProxies().delete(project=PROJECT,targetTcpProxy=tcpProxy).execute()
+                self.targetProxies.append(tcpProxy)
+        except:
+            print('No TCP Proxies present')
+
+    def delete_urlMaps(self):
+        query = self.compute_API.urlMaps().list(project=PROJECT).execute()
+        try:
+            for data in query['items']:
+                urlMap = data['name']
+                print('Deleting ' + urlMap)
+                delete = self.compute_API.urlMaps().delete(project=PROJECT,urlMap=urlMap).execute()
+                self.urlMaps.append(urlMap)
+        except:
+            print('No URL Maps prsent')
+
+    def delete_backend_services(self):
+        query = self.compute_API.backendServices().list(project=PROJECT).execute()
+        try:
+            for data in query['items']:
+                backend = data['name']
+                print(backend)
+                print('Deleting ' + backend)
+                delete = self.compute_API.backendServices().delete(project=PROJECT,backendService=backend).execute()
+                self.backendServices.append(backend)
+        except:
+            print('No Backends present')
+
+    def delete_instance_groups(self):
+        query = self.compute_API.instanceGroups().aggregatedList(project=PROJECT).execute()
+        aggregated_list = query['items']
+        for zone,results in aggregated_list.items():
+            if 'instanceGroups' in results:
+                for data in results['instanceGroups']:
+                    group = data['name']
+                    zoneName = zone[6:]
+                    print('Deleting ' + group + ' in ' + zoneName)
+                    delete = self.compute_API.instanceGroups().delete(project=PROJECT,zone=zoneName,instanceGroup=group).execute()
+                    self.instanceGroups.append(group)
+
+    def delete_health_checks(self):
+        query = self.compute_API.healthChecks().list(project=PROJECT).execute()
+        try:
+            aggregated_list = query['items']
+            for data in aggregated_list:
+                hc = data['name']
+                print('Deleting ' + hc)
+                delete = self.compute_API.healthChecks().delete(project=PROJECT,healthCheck=hc).execute()
+                self.healthchecks.append(hc)
+        except:
+            print('No Health checks present')
+        httpQuery = self.compute_API.httpHealthChecks().list(project=PROJECT).execute()
+        try:
+            aggregated_list = httpQuery['items']
+            for data in aggregated_list:
+                httphc = data['name']
+                print('Deleting ' + httphc)
+                delete = self.compute_API.httpHealthChecks().delete(project=PROJECT,httpHealthCheck=httphc).execute()
+                self.healthchecks.append(httphc)
+        except:
+            print('No HTTP Health checks present')
+        httpsQuery = self.compute_API.httpsHealthChecks().list(project=PROJECT).execute()
+        try:
+            aggregated_list = httpsQuery['items']
+            for data in aggregated_list:
+                httpshc = data['name']
+                print('Deleting ' + httpshc)
+                delete = self.compute_API.httpsHealthChecks().delete(project=PROJECT,httpsHealthCheck=httphc).execute()
+                self.healthchecks.append(httpshc)
+        except:
+            print('No HTTPS Health checks present')
+
+    def delete_addresses(self):
+        globalQuery = self.compute_API.globalAddresses().list(project=PROJECT).execute()
+        try:
+            aggregated_list = globalQuery['items']
+            for data in aggregated_list:
+                address = data['name']
+                print('Deleting ' + address)
+                delete = self.compute_API.globalAddresses().delete(project=PROJECT,address=address).execute()
+                self.addresses.append(address)
+        except:
+            print('No Global Static IPs present')
+        query = self.compute_API.addresses().aggregatedList(project=PROJECT).execute()
+        aggregated_list = query['items']
+        for region,results in aggregated_list.items():
+            if region != 'global':
+                if 'addresses' in results:
+                    for data in results['addresses']:
+                        address = data['name']
+                        regionName = region[8:]
+                        print('Deleting ' + address + ' in ' + regionName)
+                        delete = self.compute_API.addresses().delete(project=PROJECT,region=regionName,address=address).execute()
+                        self.addresses.append(address)
+
+
+
+def main():
+    GoogleProjectCleanUp()
+
+if __name__ == '__main__':
+    main()
